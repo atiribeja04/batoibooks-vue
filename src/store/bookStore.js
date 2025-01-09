@@ -18,6 +18,14 @@ async function fetchDBBooks() {
 
 async function addBookToDB(newBook) {
   try {
+    const existe = state.books.some(
+      book => book.userId === newBook.userId && book.idModule === newBook.idModule
+    );
+
+    if (existe) {
+      throw new Error("Ya existe ese libro.");
+    }
+
     const response = await axios.post("http://localhost:3000/books", newBook);
     state.books.push(response.data);
   } catch (error) {
@@ -36,9 +44,25 @@ async function deleteBookFromDB(bookId) {
   }
 }
 
+async function updateBookInDB(updatedBook) {
+  try {
+    const response = await axios.put(`http://localhost:3000/books/${updatedBook.bookId}`, updatedBook);
+    const index = state.books.findIndex(book => book.bookId === updatedBook.bookId);
+    if (index !== -1) {
+      state.books[index] = response.data; 
+    }
+  } catch (error) {
+    console.error('Error al actualizar el libro:', error);
+    throw error;
+  }
+}
+
+
+
 export default {
   state,
   fetchDBBooks,
   addBookToDB,
   deleteBookFromDB,
+  updateBookInDB,
 };
